@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sunno – Admin</title>
+<style>
+:root{--nv:#1b1a3a;--pu:#6d4aff;--bg:#f5f6fb;--cd:#fff;--tx:#1d1d2b;--mu:#6b6c80;--bd:#e6e7f0;--ok:#067647;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.hide{display:none!important}
+.lgw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--nv);padding:16px}
+.lgc{background:#fff;border-radius:18px;padding:26px;width:100%;max-width:380px}
+.logo{font-size:26px;font-weight:800;color:var(--pu)}
+input,select{width:100%;padding:10px;margin-top:8px;border:1px solid var(--bd);border-radius:10px;font:inherit;background:#fff;color:var(--tx)}
+.btn{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:var(--pu);color:var(--on,#fff);font:inherit;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.6}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:14px}
+.ok{background:#e7f6ee;color:var(--ok)}.er{background:#fdecea;color:var(--bad)}
+#app{display:flex;min-height:100vh}
+#sb{width:230px;background:var(--nv);color:#cfd0ee;padding:18px 12px;flex-shrink:0}
+#sb .logo{color:#fff;padding:0 8px 18px}
+#sb a{display:block;padding:10px 12px;border-radius:10px;color:#cfd0ee;cursor:pointer;margin-bottom:4px}
+#sb a.on{background:var(--pu);color:var(--on,#fff)}
+.lp{background:#fff;border-radius:12px;padding:6px;display:inline-flex;margin-bottom:8px}.lp img{max-height:52px;max-width:150px;display:block}
+.rn{color:#fff;font-size:18px;word-break:break-word}.pw{color:#9a9bc4;font-size:12px;padding:14px 10px}
+@keyframes hl{0%,100%{filter:drop-shadow(0 0 5px #ff3df0)}33%{filter:drop-shadow(0 0 5px #3dd9ff)}66%{filter:drop-shadow(0 0 5px #ffe53d)}}img.holo{animation:hl 3s linear infinite}
+.fi{border-top:1px solid var(--bd);padding:10px 0}.fi:first-child{border-top:0}
+.mn{flex:1;min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#fff;border-bottom:1px solid var(--bd)}
+.top b{font-size:18px;flex:1}.top #mb{display:none;border:0;background:none;font-size:22px}
+main{padding:18px;max-width:980px}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kp{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px}
+.kp b{display:block;font-size:26px}.kp span{color:var(--mu);font-size:13px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 10px}
+.rh{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tag{font-size:12px;padding:2px 9px;border-radius:99px}
+.tg-ok{background:#e7f6ee;color:var(--ok)}.tg-bad{background:#fdecea;color:var(--bad)}.tg-n{background:#eef;color:#4338ca}
+.mut{color:var(--mu);font-size:13px;margin-top:6px}
+.chip{display:inline-block;background:#eef;color:#4338ca;border-radius:99px;padding:2px 10px;margin:4px 6px 0 0;font-size:13px}
+.chip i{font-style:normal;cursor:pointer;margin-left:6px}
+.row{display:flex;gap:8px;align-items:center;margin-top:8px}.row input,.row select{margin-top:0}
+.sbtn{padding:8px 12px;border:1px solid var(--bd);background:#fff;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+summary{cursor:pointer;color:var(--pu);margin-top:8px}
+@media(max-width:800px){#sb{position:fixed;inset:0 auto 0 0;z-index:5;transform:translateX(-100%);transition:.2s}#sb.open{transform:none}.top #mb{display:block}}
+</style>
+</head>
+<body>
+<div id="lg" class="lgw"><div class="lgc"><div class="logo">★ Sunno</div><div class="mut">Innoxol Technologies</div>
+<input id="em" type="email" placeholder="Email" autocomplete="username"><input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+<button class="btn" id="lb">Login</button><div id="lm"></div></div></div>
+<div id="app" class="hide">
+<aside id="sb"><div class="logo">★ Sunno</div>
+<a data-v="dash" class="on">Dashboard</a><a data-v="rest">Restaurants</a><a data-v="fb">Feedback</a><a data-v="qr">QR Codes</a><a data-v="pack">Packages</a><a data-v="subs">Subscriptions</a><a data-v="pay">Payments</a><a data-v="aud">Audit log</a><a data-lo>Logout</a></aside>
+<div class="mn"><div class="top"><button id="mb">☰</button><b id="pt">Dashboard</b><span class="mut" id="who"></span></div><main id="main"></main></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+var URL_="https://janatzwnpkkktdjtijvg.supabase.co",KEY="sb_publishable_c0zs6fe0koMK3koP5lsvhw_et_UnE2a";
+var TOK=null,V="dash",DATA=[],PK=[],ROLE="admin",CTX=null,FB=[],PD=30,BFLT="",RN=[];
+var ADD_USER_FN="swift-handler";
+function $(i){return document.getElementById(i)}
+function esc(t){var d=document.createElement("div");d.textContent=t==null?"":t;return d.innerHTML}
+function H(){return {"apikey":KEY,"Authorization":"Bearer "+(TOK||KEY),"Content-Type":"application/json"}}
+function J(x){if(!x.ok)throw new Error(x.status==401?"login":x.status);return x.json()}
+function rpc(n,b){return fetch(URL_+"/rest/v1/rpc/"+n,{method:"POST",headers:H(),body:JSON.stringify(b||{})}).then(function(x){if(!x.ok)return x.json().then(function(j){throw new Error(j.message||x.status)});return x})}
+function fn(n,b){return fetch(URL_+"/functions/v1/"+n,{method:"POST",headers:H(),body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){if(!r.ok||j.error)throw new Error(j.error||j.msg||j.message||r.status);return j})})}
+function msg(id,t,ok){$(id).innerHTML='<div class="msg '+(ok?"ok":"er")+'">'+esc(t)+'</div>'}
+
+$("lb").onclick=function(){
+ var b=$("lb");b.disabled=true;$("lm").innerHTML="";
+ fetch(URL_+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":KEY,"Content-Type":"application/json"},body:JSON.stringify({email:$("em").value.trim(),password:$("pw").value})})
+ .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})})
+ .then(function(x){if(!x.ok||!x.j.access_token)throw 0;TOK=x.j.access_token;$("pw").value="";$("who").textContent=x.j.user&&x.j.user.email||"";boot()})
+ .catch(function(){msg("lm","Email ya password galat hai.")}).then(function(){b.disabled=false});
+};
+
+$("mb").onclick=function(){$("sb").classList.toggle("open")};
+
+function boot(){
+ fetch(URL_+"/rest/v1/admins?select=user_id",{headers:H()}).then(J).then(function(a){
+  $("lg").className="hide";$("app").className="";
+  if(a.length){return Promise.all([rpc("admin_overview").then(function(x){return x.json()}),fetch(URL_+"/rest/v1/packages?select=*&order=max_branches",{headers:H()}).then(J)]).then(function(r){DATA=r[0];PK=r[1];show("dash")})}
+  return bootRole();
+ }).catch(function(){$("lg").className="lgw";msg("lm","Login nahi ho saka. Dobara koshish karein.")});
+}
+function reload(){return rpc("admin_overview").then(function(x){return x.json()}).then(function(d){DATA=d;show(V)})}
+$("sb").onclick=function(e){if(e.target.closest("[data-lo]"))return location.reload();var a=e.target.closest("a[data-v]");if(a){show(a.getAttribute("data-v"));$("sb").classList.remove("open")}};
+function show(v){
+ if(ROLE!="admin")return showR(v);
+ V=v;document.querySelectorAll("#sb a[data-v]").forEach(function(a){a.classList.toggle("on",a.getAttribute("data-v")==v)});
+ $("pt").textContent={dash:"Platform Overview",rest:"Restaurants",fb:"Feedback",qr:"QR Codes",pack:"Packages",subs:"Subscriptions",pay:"Payments",aud:"Audit log",soon:"Jald aa raha hai"}[v];
+ if(v=="fb"){loadAdminFB();return}
+ if(v=="pay"||v=="aud"){loadExtra(v);return}
+ $("main").innerHTML=v=="dash"?vDash():v=="rest"?vRest():v=="pack"?vPack():v=="subs"?vSubs():v=="qr"?vAqr():'<div class="card">Ye hissa agle stage mein banega (Packages, Payments aur Audit log).</div>';
+ if(v=="qr")drawQR();
+}
+function vDash(){
+ var n=DATA.length,act=DATA.filter(function(c){return c.active}).length,br=0,fb=0;
+ DATA.forEach(function(c){br+=c.branches.length;fb+=Number(c.total)});
+ var f=n?act/n:0,C=2*Math.PI*40;
+ return '<div class="grid"><div class="kp"><b>'+n+'</b><span>Restaurants</span></div><div class="kp"><b>'+act+'</b><span>Active</span></div><div class="kp"><b>'+br+'</b><span>Branches</span></div><div class="kp"><b>'+fb+'</b><span>Total feedback</span></div><div class="kp"><b>'+DATA.filter(function(c){return c.sub_status=="grace"}).length+'</b><span>Grace mein</span></div><div class="kp"><b>'+DATA.filter(function(c){return c.sub_status=="expired"}).length+'</b><span>Expire</span></div></div>'+
+ '<div class="card"><b>Account ki halat</b><div class="row" style="gap:20px"><svg viewBox="0 0 100 100" width="130" height="130"><circle cx="50" cy="50" r="40" fill="none" stroke="#fdecea" stroke-width="14"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6d4aff" stroke-width="14" stroke-dasharray="'+(C*f)+' '+C+'" transform="rotate(-90 50 50)"/><text x="50" y="55" text-anchor="middle" font-size="18" font-weight="700">'+Math.round(f*100)+'%</text></svg><div><span class="tag tg-ok">Active '+act+'</span><br><span class="tag tg-bad" style="margin-top:6px;display:inline-block">Band '+(n-act)+'</span></div></div></div>';
+}
+function opts(a){return a.map(function(x){return '<option>'+esc(x)+'</option>'}).join("")}
+function vRest(){
+ var h='<div class="card"><b>Naya client banayein</b><div class="g2"><input id="cn" placeholder="Restaurant ka naam"><input id="cs" placeholder="Link ka naam (tea-time)"><input id="ce" type="email" placeholder="Owner ki email"><input id="cp" placeholder="Owner ka password (8+ huroof)"><input id="cb" placeholder="Branches, comma se alag"><select id="cg">'+opts(PK.map(function(p){return p.name}))+'</select><select id="cl"><option value="monthly">Mahana</option><option value="annual">Salana</option></select></div><button class="btn" id="cc">Client banayein</button><div id="cm"></div></div>';
+ DATA.forEach(function(c){
+  var s=esc(c.slug);
+  h+='<div class="card" data-s="'+s+'"><div class="rh"><b>'+esc(c.name)+'</b><span class="tag '+(c.active?"tg-ok":"tg-bad")+'">'+(c.active?"Active":"Band")+'</span><span class="tag tg-n">'+esc(c.package||"Package nahi")+'</span><span class="mut">'+esc(c.sub_status||"")+(c.ends_on?" · "+esc(c.ends_on)+" tak":"")+'</span></div>'+
+  '<div class="mut">'+s+' · '+c.total+' feedback</div>'+
+  '<div class="mut">Branches '+c.branches.length+' / '+c.max_branches+'</div><div>'+c.branches.map(function(b){return '<span class="chip">'+esc(b.name)+'<i data-a="rb" data-n="'+encodeURIComponent(b.name)+'">✕</i></span>'}).join("")+'</div>'+
+  '<div class="row"><input data-i="bn" placeholder="Nayi branch"><button class="sbtn" data-a="ab">Jorein</button></div>'+
+  '<div class="mut">Users '+c.users.length+' / '+c.max_users+'</div>'+c.users.map(function(u){return '<div class="mut" style="margin-top:2px">'+esc(u.email)+' · '+esc(u.role)+(u.branch?" · "+esc(u.branch):"")+'</div>'}).join("")+
+  '<details><summary>Naya user jorein</summary><div class="g2"><input data-i="ue" type="email" placeholder="Email"><input data-i="up" placeholder="Password (8+)"><select data-i="ur"><option value="owner">Owner</option><option value="manager">Branch Manager</option></select><select data-i="ub"><option value="">Branch (manager ke liye)</option>'+opts(c.branches.map(function(b){return b.name}))+'</select></div><button class="sbtn" data-a="au" style="margin-top:8px">User banayein</button></details>'+
+  '<details><summary>Branding aur settings</summary><div class="g2"><div><div class="mut">Brand ka rang</div><input type="color" data-i="bc" value="'+esc(c.brand_color||"#6d4aff")+'" style="height:44px;padding:4px"></div><div><div class="mut">Naam ka font</div><select data-i="bf"><option value="">Normal</option>'+sel(FONTS,c.brand_font)+'</select></div><div><div class="mut">Dashboard ka style</div><select data-i="bs">'+sel(["clean","soft","bold"],c.brand_style||"clean")+'</select></div><div><div class="mut">Logo ('+(c.has_logo?"lagi hui hai":"abhi nahi")+')</div><input type="file" accept="image/*" data-i="bl2"></div><div><div class="mut">Google review link</div><input data-i="gl" placeholder="https://..." value="'+esc(c.google_link||"")+'"></div><div><div class="mut">Alert email</div><input data-i="ae" type="email" placeholder="manager@restaurant.com" value="'+esc(c.alert_email||"")+'"></div></div><label class="mut" style="display:block;margin-top:8px"><input type="checkbox" data-i="bh" style="width:auto;margin:0 6px 0 0"'+(c.holo?" checked":"")+'>Logo par holographic chamak</label><label class="mut" style="display:block;margin-top:6px"><input type="checkbox" data-i="bn2" style="width:auto;margin:0 6px 0 0"'+(c.hide_name?" checked":"")+'>Naam na dikhayen (logo mein likha ho)</label><label class="mut" style="display:block;margin-top:6px"><input type="checkbox" data-i="bg" style="width:auto;margin:0 6px 0 0">Logo ka background khud hatayein</label><button class="sbtn" data-a="sb2" style="margin-top:8px">Save karein</button></details><div class="row"><select data-i="pk">'+opts(PK.map(function(p){return p.name}))+'</select><select data-i="bl"><option value="monthly">Mahana</option><option value="annual">Salana</option></select><button class="sbtn" data-a="sp">Package lagayein</button></div>'+
+  '<div class="row"><button class="sbtn" data-a="tg" data-v="'+(c.active?0:1)+'">'+(c.active?"Band karein":"Chalu karein")+'</button></div><div data-i="mm"></div></div>';
+ });
+ return h;
+}
+function val(card,i){return card.querySelector('[data-i="'+i+'"]').value.trim()}
+function slugify(t){return t.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+$("main").oninput=function(e){if(e.target.id=="cn"&&!$("cs").dataset.m)$("cs").value=slugify(e.target.value);if(e.target.id=="cs")e.target.dataset.m=1};
+$("main").onclick=function(e){
+ var qs=e.target.closest("[data-qs]");if(qs)return saveQR(qs);
+ var t=e.target.closest("[data-a],#cc");if(!t)return;
+ if(ROLE!="admin")return roleClick(t);
+ if(t.id=="cc")return createClient(t);
+ var a=t.getAttribute("data-a"),card=t.closest(".card"),s=card.getAttribute("data-s"),mm=card.querySelector('[data-i="mm"]');
+ function err(x){mm.innerHTML='<div class="msg er">'+esc(x.message)+'</div>'}
+ if(a=="tg"){if(t.getAttribute("data-v")=="0"&&!confirm("Is client ka page aur dashboard band ho jayega. Pakka?"))return;rpc("admin_set_active",{p_slug:s,p_active:t.getAttribute("data-v")=="1"}).then(reload).catch(err)}
+ else if(a=="rb"){var n=decodeURIComponent(t.getAttribute("data-n"));if(!confirm(n+" hata dein? Purani feedback mehfooz rahegi."))return;rpc("admin_remove_branch",{p_slug:s,p_name:n}).then(reload).catch(err)}
+ else if(a=="ab"){var v=val(card,"bn");if(v)rpc("admin_add_branch",{p_slug:s,p_name:v}).then(reload).catch(err)}
+ else if(a=="sp"){rpc("admin_set_package",{p_slug:s,p_package:val(card,"pk"),p_billing:val(card,"bl"),p_days:val(card,"bl")=="annual"?365:30}).then(reload).catch(err)}
+ else if(a=="np"||a=="pk"||a=="us"||a=="ex"){return pkSub(a,t,card,s,mm,err)}
+ else if(a=="vp"||a=="rj"||a=="rp"){return payAct(a,t,card,mm,err)}
+ else if(a=="sb2"){return brandSave(t,card,s,mm,err)}
+ else if(a=="au"){t.disabled=true;fn(ADD_USER_FN,{slug:s,email:val(card,"ue"),password:val(card,"up"),role:val(card,"ur"),branch:val(card,"ub")}).then(reload).catch(function(x){err(x);t.disabled=false})}
+};
+function rest(m,p,b){return fetch(URL_+"/rest/v1/"+p,{method:m,headers:Object.assign({"Prefer":"return=minimal"},H()),body:b?JSON.stringify(b):undefined}).then(function(x){if(!x.ok)return x.json().then(function(j){throw new Error(j.message||x.status)});return x})}
+function loadPK(){return fetch(URL_+"/rest/v1/packages?select=*&order=max_branches",{headers:H()}).then(J).then(function(p){PK=p;show(V)})}
+var PF=["max_branches","max_users","monthly_price","annual_price","extra_branch_price","extra_user_price"],PL=["Branches","Users","Mahana Rs","Salana Rs","Extra branch Rs","Extra user Rs"];
+function sel(a,v){return a.map(function(x){return '<option'+(x==v?' selected':'')+'>'+esc(x)+'</option>'}).join("")}
+function pnames(){return PK.map(function(p){return p.name})}
+function vPack(){
+ var def=[1,2,0,0,1500,300];
+ var h='<div class="card"><b>Naya package</b><div class="g2"><div><div class="mut">Naam</div><input data-i="name" placeholder="Package ka naam"></div>'+PF.map(function(k,i){return '<div><div class="mut">'+PL[i]+'</div><input type="number" min="0" data-i="'+k+'" value="'+def[i]+'"></div>'}).join("")+'</div><button class="btn" data-a="np">Package banayein</button><div data-i="mm"></div></div>';
+ PK.forEach(function(p){h+='<div class="card" data-id="'+esc(p.id)+'"><b>'+esc(p.name)+'</b><div class="g2">'+PF.map(function(k,i){return '<div><div class="mut">'+PL[i]+'</div><input type="number" min="0" data-i="'+k+'" value="'+Number(p[k])+'"></div>'}).join("")+'</div><button class="sbtn" data-a="pk" style="margin-top:8px">Save</button><div data-i="mm"></div></div>'});
+ return h;
+}
+function vSubs(){
+ return DATA.map(function(c){
+  var ok=c.sub_status=="active"||c.sub_status=="grace";
+  return '<div class="card" data-s="'+esc(c.slug)+'"><div class="rh"><b>'+esc(c.name)+'</b><span class="tag '+(ok?"tg-ok":"tg-bad")+'">'+esc(c.sub_status||"subscription nahi")+'</span></div><div class="g2">'+
+  '<div><div class="mut">Package</div><select data-i="sp">'+sel(pnames(),c.package)+'</select></div>'+
+  '<div><div class="mut">Billing</div><select data-i="sb">'+sel(["monthly","annual"],c.billing)+'</select></div>'+
+  '<div><div class="mut">Khatam hone ki tareekh</div><input type="date" data-i="en" value="'+esc(c.ends_on||"")+'"></div>'+
+  '<div><div class="mut">Grace ke din</div><input type="number" min="0" data-i="gr" value="'+(c.grace_days==null?7:Number(c.grace_days))+'"></div>'+
+  '<div><div class="mut">Extra branches</div><input type="number" min="0" data-i="xb" value="'+Number(c.extra_branches||0)+'"></div>'+
+  '<div><div class="mut">Extra users</div><input type="number" min="0" data-i="xu" value="'+Number(c.extra_users||0)+'"></div>'+
+  '<div><div class="mut">Status</div><select data-i="st">'+sel(["active","suspended","pending"],(c.sub_status=="grace"||c.sub_status=="expired")?"active":c.sub_status)+'</select></div></div>'+
+  '<div class="row"><button class="sbtn" data-a="us">Save</button><button class="sbtn" data-a="ex" data-d="30">+30 din</button><button class="sbtn" data-a="ex" data-d="365">+1 saal</button></div><div data-i="mm"></div></div>';
+ }).join("")||'<div class="card">Koi restaurant nahi.</div>';
+}
+function pkSub(a,t,card,s,mm,err){
+ if(a=="np"||a=="pk"){
+  var b={};PF.forEach(function(k){b[k]=parseInt(val(card,k),10)||0});
+  if(a=="np"){b.name=val(card,"name");if(!b.name)return err(new Error("Package ka naam likhein"));return rest("POST","packages",b).then(loadPK).catch(err)}
+  return rest("PATCH","packages?id=eq."+encodeURIComponent(card.getAttribute("data-id")),b).then(loadPK).catch(err);
+ }
+ if(a=="ex"){
+  var d=parseInt(t.getAttribute("data-d"),10),e=val(card,"en"),td=new Date().toISOString().slice(0,10),base=(e&&e>td)?e:td,x=new Date(base+"T00:00:00Z");
+  x.setUTCDate(x.getUTCDate()+d);card.querySelector('[data-i="en"]').value=x.toISOString().slice(0,10);card.querySelector('[data-i="st"]').value="active";
+ }
+ rpc("admin_update_subscription",{p_slug:s,p_package:val(card,"sp"),p_billing:val(card,"sb"),p_status:val(card,"st"),p_ends:val(card,"en")||null,p_grace:parseInt(val(card,"gr"),10)||0,p_xb:parseInt(val(card,"xb"),10)||0,p_xu:parseInt(val(card,"xu"),10)||0}).then(reload).catch(err);
+}
+function money(x){return "Rs "+Number(x||0).toLocaleString()}
+function charge(c){var p=PK.filter(function(x){return x.name==c.package})[0];if(!p)return 0;return (c.billing=="annual"?p.annual_price:p.monthly_price)+(c.extra_branches||0)*p.extra_branch_price+(c.extra_users||0)*p.extra_user_price}
+function loadExtra(v){
+ $("main").innerHTML='<div class="card">Loading...</div>';
+ (v=="pay"?rpc("admin_payments"):rpc("admin_audit",{p_limit:100})).then(function(x){return x.json()}).then(function(d){if(V!=v)return;$("main").innerHTML=v=="pay"?vPay(d):vAud(d)})
+ .catch(function(e){$("main").innerHTML='<div class="card"><div class="msg er">'+esc(e.message)+'</div></div>'});
+}
+function vPay(d){
+ var pend=d.filter(function(x){return x.status=="pending"}).length,ver=0;d.forEach(function(x){if(x.status=="verified")ver+=Number(x.amount)});
+ var h='<div class="grid"><div class="kp"><b>'+pend+'</b><span>Pending payments</span></div><div class="kp"><b>'+money(ver)+'</b><span>Verified (kul)</span></div></div>';
+ h+='<div class="card"><b>Payment darj karein</b><div class="g2"><select data-i="rs">'+DATA.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join("")+'</select><input type="number" min="0" data-i="am" placeholder="Rakam (Rs)"><select data-i="mt"><option value="bank_transfer">Bank transfer</option><option value="jazzcash_easypaisa">JazzCash / Easypaisa</option><option value="card">Card</option></select><input data-i="rf" placeholder="Transaction reference"><input data-i="nt" placeholder="Note (optional)"></div><button class="btn" data-a="rp">Darj karein (pending)</button><div data-i="mm"></div></div>';
+ h+='<div class="card"><b>Subscription ki qeemat</b>'+DATA.map(function(c){return '<div class="mut" style="margin-top:6px"><b>'+esc(c.name)+'</b> · '+esc(c.package||"-")+' ('+esc(c.billing||"-")+') · '+money(charge(c))+' · '+esc(c.sub_status||"")+(c.ends_on?" · "+esc(c.ends_on)+" tak":"")+'</div>'}).join("")+'</div>';
+ d.forEach(function(x){var st=x.status;
+  h+='<div class="card" data-id="'+esc(x.id)+'"><div class="rh"><b>'+esc(x.name)+'</b><span class="tag '+(st=="verified"?"tg-ok":st=="rejected"?"tg-bad":"tg-n")+'">'+esc(st)+'</span><b>'+money(x.amount)+'</b></div><div class="mut">'+esc(x.method)+' · '+esc(x.reference||"reference nahi")+(x.note?" · "+esc(x.note):"")+'</div><div class="mut">'+new Date(x.submitted_at).toLocaleString()+'</div>'+
+  (st=="pending"?'<div class="row"><button class="sbtn" data-a="vp" data-x="1">Verify + subscription barhayen</button><button class="sbtn" data-a="vp" data-x="0">Sirf verify</button><button class="sbtn" data-a="rj">Reject</button></div>':"")+'<div data-i="mm"></div></div>'});
+ return h||'<div class="card">Koi payment nahi.</div>';
+}
+function vAud(d){
+ return '<div class="card"><b>Aakhri 100 kaam</b>'+(d.map(function(x){return '<div class="mut" style="margin-top:8px"><b>'+esc(x.action)+'</b> '+esc(x.details&&x.details.name||"")+(x.details&&x.details.status?" ("+esc(x.details.status)+")":"")+'<br>'+new Date(x.at).toLocaleString()+' · '+esc(x.actor||"SQL / system")+'</div>'}).join("")||'<div class="mut">Abhi koi record nahi.</div>')+'</div>';
+}
+function payAct(a,t,card,mm,err){
+ var id=card.getAttribute("data-id");
+ if(a=="rp"){
+  var rid=val(card,"rs"),amt=parseInt(val(card,"am"),10);
+  if(!rid||isNaN(amt)||amt<0)return err(new Error("Restaurant aur sahi rakam likhein"));
+  return rest("POST","payments",{restaurant_id:rid,amount:amt,method:val(card,"mt"),reference:val(card,"rf")||null,note:val(card,"nt")||null}).then(function(){loadExtra("pay")}).catch(err);
+ }
+ if(a=="vp")return rpc("admin_verify_payment",{p_id:id,p_extend:t.getAttribute("data-x")=="1"}).then(reload).catch(err);
+ if(a=="rj")return rpc("admin_reject_payment",{p_id:id,p_note:""}).then(function(){loadExtra("pay")}).catch(err);
+}
+
+var FONTS=["Poppins","Montserrat","Playfair Display","Pacifico","Lobster","Bebas Neue","Oswald","Raleway","Dancing Script","Cinzel"];
+var PDO=[["1","Aaj"],["7","7 din"],["30","30 din"],["90","3 mahine"],["180","6 mahine"],["365","1 saal"],["0","Sab"]];
+function loadFont(f){if(FONTS.indexOf(f)<0)return false;var id="f-"+f.replace(/\s/g,"");if(!document.getElementById(id)){var l=document.createElement("link");l.id=id;l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+encodeURIComponent(f).replace(/%20/g,"+")+"&display=swap";document.head.appendChild(l)}return true}
+function shade(h,f){var n=parseInt(h.slice(1),16);return "#"+[n>>16&255,n>>8&255,n&255].map(function(v){return ("0"+Math.round(v*f).toString(16)).slice(-2)}).join("")}
+function brandRole(r){
+ var R=document.documentElement.style,c=/^#[0-9a-fA-F]{6}$/.test(r.brand_color||"")?r.brand_color:null;
+ if(c){R.setProperty("--pu",c);R.setProperty("--nv",shade(c,.42));var n=parseInt(c.slice(1),16),l=.299*(n>>16)+.587*(n>>8&255)+.114*(n&255);R.setProperty("--on",l>170?"#111":"#fff");if(r.brand_style=="soft")R.setProperty("--bg","color-mix(in srgb, "+c+" 9%, #fff)")}
+ document.title=r.name+" – Dashboard";
+}
+function buildNav(){
+ var r=CTX.restaurant,h='<div style="padding:0 8px 14px">'+(r.logo_data?'<div class="lp"><img id="rl" alt=""></div>':"")+((r.hide_name&&r.logo_data)?"":'<div class="rn" id="rnm"></div>')+'</div>';
+ RN.forEach(function(x){h+='<a data-v="'+x[0]+'">'+x[1]+'</a>'});
+ $("sb").innerHTML=h+'<a data-lo>Logout</a><div class="pw">Powered by Sunno</div>';$("sb").className="";
+ if(r.logo_data&&/^data:image\/(png|jpeg|webp|svg\+xml);base64,/.test(r.logo_data)){$("rl").src=r.logo_data;if(r.holo)$("rl").className="holo"}
+ if($("rnm")){$("rnm").textContent=r.name;if(r.brand_font&&loadFont(r.brand_font))$("rnm").style.fontFamily="'"+r.brand_font+"',system-ui,sans-serif"}
+}
+function bootRole(){
+ return rpc("my_context").then(function(x){return x.json()}).then(function(c){
+  CTX=c;ROLE=c.role;brandRole(c.restaurant);
+  RN=ROLE=="owner"?[["dash","Dashboard"],["br","Branches"],["qr","QR Codes"],["feed","Feedback"],["comp","Complaints"],["rep","Reports"],["sub","Subscription"],["acc","Account"]]:[["dash","Dashboard"],["feed","Feedback"],["comp","Complaints"],["rep","Reports"],["acc","Account"]];
+  buildNav();
+  if(c.restaurant.active===false){$("main").innerHTML='<div class="card"><div class="msg er">Aap ka account filhal band hai. Sunno se rabta karein.</div></div>';return}
+  return loadFB().then(function(){showR("dash")});
+ });
+}
+function loadFB(){var acc=[];function pg(i){return fetch(URL_+"/rest/v1/feedback?select=*&order=created_at.desc&limit=1000&offset="+i*1000,{headers:H()}).then(J).then(function(a){acc=acc.concat(a);return(a.length==1000&&i<9)?pg(i+1):acc})}return pg(0).then(function(a){FB=a})}
+function avg(a){var s=0;a.forEach(function(e){s+=e.rating});return a.length?s/a.length:0}
+function sets(){var from=PD>0?Date.now()-PD*864e5:0,T=function(e){return new Date(e.created_at).getTime()},ok=function(e){return !BFLT||e.branch==BFLT};
+ return {cur:FB.filter(function(e){return T(e)>=from&&ok(e)}),prev:PD>0?FB.filter(function(e){return T(e)>=from-PD*864e5&&T(e)<from&&ok(e)}):[]}}
+function ctl(){return '<div class="card row" style="margin-top:0"><select id="rpd">'+PDO.map(function(o){return '<option value="'+o[0]+'"'+(o[0]==PD?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select>'+(ROLE=="owner"?'<select id="rbf"><option value="">Sab branches</option>'+CTX.branches.map(function(b){return '<option'+(b.name==BFLT?" selected":"")+'>'+esc(b.name)+'</option>'}).join("")+'</select>':"")+'</div>'}
+function kp(v,l,c){return '<div class="kp"><b'+(c?' style="color:'+c+'"':"")+'>'+v+'</b><span>'+l+'</span></div>'}
+function item(e){var low=e.rating<=3;return '<div class="fi"><b>'+"★".repeat(e.rating)+'</b>'+(low?'<span class="tag '+(e.resolved?"tg-ok":"tg-bad")+'" style="margin-left:6px">'+(e.resolved?"Resolved":"Alert")+'</span>':"")+'<div>'+(esc(e.comment)||'<span class="mut">Koi comment nahi</span>')+'</div><div class="mut">'+esc(e.branch)+" · "+new Date(e.created_at).toLocaleString()+'</div>'+(low&&!e.resolved?'<button class="sbtn" data-a="rv" data-id="'+esc(e.id)+'" style="margin-top:6px">Resolved mark karein</button>':"")+'</div>'}
+function donut3(a,b,c){var t=a+b+c||1,C=2*Math.PI*40,o=0,h='<svg viewBox="0 0 100 100" width="130" height="130">';[[a,"#16a34a"],[b,"#f59e0b"],[c,"#dc2626"]].forEach(function(x){var l=x[0]/t*C;h+='<circle cx="50" cy="50" r="40" fill="none" stroke="'+x[1]+'" stroke-width="14" stroke-dasharray="'+l+' '+(C-l)+'" stroke-dashoffset="'+(-o)+'" transform="rotate(-90 50 50)"/>';o+=l});return h+'<text x="50" y="55" text-anchor="middle" font-size="16" font-weight="700">'+Math.round(a/t*100)+'%</text></svg>'}
+function trendSvg(d){
+ var a=d.slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at)}),B={},K=[],sp=a.length?(new Date(a[a.length-1].created_at)-new Date(a[0].created_at))/864e5:0,md=sp<=35?0:(sp<=200?1:2);
+ a.forEach(function(e){var t=new Date(e.created_at).getTime(),dt=new Date(t),k=md==0?dt.toDateString():(md==1?Math.floor(t/6048e5):dt.getFullYear()*12+dt.getMonth());if(!B[k]){B[k]={s:0,n:0,t:t};K.push(k)}B[k].s+=e.rating;B[k].n++});
+ if(K.length<2)return '<span class="mut">Trend ke liye kam az kam 2 din ka data chahiye.</span>';
+ var W=300,H2=130,L=22,pts=K.map(function(k,i){var b=B[k];return [L+i*(W-L-8)/(K.length-1),8+(5-b.s/b.n)/4*(H2-34)]}),g="";
+ for(var r=1;r<=5;r++){var y=8+(5-r)/4*(H2-34);g+='<line x1="'+L+'" x2="'+(W-8)+'" y1="'+y+'" y2="'+y+'" stroke="#e6e7f0"/><text x="2" y="'+(y+4)+'" font-size="10" fill="#6b6c80">'+r+'</text>'}
+ var fm=function(k){return new Date(B[k].t).toLocaleDateString(undefined,md==2?{month:"short",year:"2-digit"}:{day:"numeric",month:"short"})};
+ return '<svg viewBox="0 0 '+W+' '+H2+'" style="width:100%">'+g+'<polyline fill="none" stroke="var(--pu)" stroke-width="2.5" points="'+pts.map(function(p){return p[0]+","+p[1]}).join(" ")+'"/>'+pts.map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="var(--pu)"/>'}).join("")+'<text x="'+L+'" y="'+(H2-6)+'" font-size="10" fill="#6b6c80">'+fm(K[0])+'</text><text x="'+(W-8)+'" y="'+(H2-6)+'" font-size="10" text-anchor="end" fill="#6b6c80">'+fm(K[K.length-1])+'</text></svg>';
+}
+function brRows(c){return CTX.branches.map(function(b){var x=c.filter(function(e){return e.branch==b.name});return {n:b.name,c:x.length,a:avg(x),o:FB.filter(function(e){return e.branch==b.name&&e.rating<=3&&!e.resolved}).length}})}
+function vRdash(){
+ var S=sets(),c=S.cur,a=avg(c),tr="",col="";
+ if(S.prev.length&&c.length){var df=a-avg(S.prev);tr=Math.abs(df)<.05?" =":(df>0?" ▲ ":" ▼ ")+Math.abs(df).toFixed(1);col=df>0?"var(--ok)":df<0?"var(--bad)":""}
+ var pos=c.filter(function(e){return e.rating>=4}).length,neu=c.filter(function(e){return e.rating==3}).length,neg=c.filter(function(e){return e.rating<=2}).length,open=FB.filter(function(e){return e.rating<=3&&!e.resolved}).length;
+ var h=ctl()+'<div class="grid">'+kp(a.toFixed(1)+" ★"+'<small style="font-size:13px;color:'+(col||"inherit")+'">'+tr+'</small>',"Average rating")+kp(c.length,"Total feedback")+kp(open,"Open complaints",open?"var(--bad)":"")+kp(ROLE=="owner"?CTX.branches.length:esc(CTX.branches[0]&&CTX.branches[0].name||"-"),ROLE=="owner"?"Branches":"Aap ki branch")+'</div>';
+ if(ROLE=="owner"){h+='<div class="card"><b>Branch performance</b>'+brRows(c).map(function(r){return '<div style="margin-top:10px"><div class="rh"><span>'+esc(r.n)+'</span><span class="mut">'+r.a.toFixed(1)+' ★ · '+r.c+' feedback</span></div><div style="background:#eef;border-radius:6px;height:10px"><div style="width:'+(r.a/5*100)+'%;background:var(--pu);height:10px;border-radius:6px"></div></div></div>'}).join("")+'</div>'}
+ h+='<div class="card"><b>Customer sentiment</b><div class="row" style="gap:20px">'+donut3(pos,neu,neg)+'<div><span class="tag tg-ok">Positive '+pos+'</span><br><span class="tag tg-n" style="margin:6px 0;display:inline-block">Neutral '+neu+'</span><br><span class="tag tg-bad">Negative '+neg+'</span></div></div></div>';
+ return h+'<div class="card"><b>Recent feedback</b>'+(c.slice(0,5).map(item).join("")||'<div class="mut">Is muddat mein koi feedback nahi.</div>')+'</div>';
+}
+function vRbr(){
+ var c=sets().cur,u=CTX.usage,s=CTX.sub||{};
+ return ctl()+'<div class="card"><b>Branches '+u.branches+' / '+(s.max_branches||"-")+'</b><table style="width:100%;margin-top:8px;font-size:14px;border-collapse:collapse"><tr style="text-align:left;color:#6b6c80"><th>Branch</th><th>Feedback</th><th>Avg</th><th>Open</th></tr>'+brRows(c).map(function(r){return '<tr style="border-top:1px solid #e6e7f0"><td>'+esc(r.n)+'</td><td>'+r.c+'</td><td>'+r.a.toFixed(1)+'</td><td>'+r.o+'</td></tr>'}).join("")+'</table><div class="mut" style="margin-top:10px">Nayi branch jorne ya hatane ke liye <a href="https://innoxol.com" target="_blank" rel="noopener">Sunno se rabta karein</a>.</div></div>';
+}
+function vRfeed(){var c=sets().cur;return ctl()+'<div class="card"><b>Feedback</b>'+(c.slice(0,100).map(item).join("")||'<div class="mut">Koi feedback nahi.</div>')+(c.length>100?'<div class="mut">Sab se nayi 100 dikhayi gayi hain.</div>':"")+'</div>'}
+function vRcomp(){var c=FB.filter(function(e){return e.rating<=3&&!e.resolved&&(!BFLT||e.branch==BFLT)});return ctl()+'<div class="card"><b>Open complaints ('+c.length+')</b>'+(c.slice(0,100).map(item).join("")||'<div class="mut">Koi open complaint nahi. Shabash!</div>')+'</div>'}
+function vRrep(){
+ var c=sets().cur,cnt=[0,0,0,0,0,0],h="";c.forEach(function(e){cnt[e.rating]++});
+ for(var q=5;q>=1;q--)h+='<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px"><span style="width:30px">'+q+'★</span><div style="flex:1;background:#eef;border-radius:6px;height:10px"><div style="width:'+(c.length?cnt[q]/c.length*100:0)+'%;background:var(--pu);height:10px;border-radius:6px"></div></div><span style="width:30px;text-align:right">'+cnt[q]+'</span></div>';
+ return ctl()+'<div class="card"><b>Rating ka trend</b>'+trendSvg(c)+'</div><div class="card"><b>Ratings ka hisaab</b>'+h+'</div>';
+}
+function vRsub(){
+ var s=CTX.sub||{},u=CTX.usage,ok=s.status=="active"||s.status=="grace";
+ return '<div class="card"><div class="rh"><b>'+esc(s.package||"Package nahi")+'</b><span class="tag '+(ok?"tg-ok":"tg-bad")+'">'+esc(s.status||"-")+'</span></div><div class="mut">'+esc(s.billing||"")+(s.ends_on?" · "+esc(s.ends_on)+" tak":"")+' · Grace '+(s.grace_days==null?"-":s.grace_days)+' din</div><div class="mut">Branches '+u.branches+' / '+(s.max_branches||"-")+' · Users '+u.users+' / '+(s.max_users||"-")+'</div></div>'+
+ '<div class="card"><b>Payment ka saboot bhejein</b><input id="pa" type="number" min="0" placeholder="Rakam (Rs)"><select id="pm"><option value="bank_transfer">Bank transfer</option><option value="jazzcash_easypaisa">JazzCash / Easypaisa</option></select><input id="pr" placeholder="Transaction reference"><input id="pn" placeholder="Note (optional)"><button class="btn" data-a="sp2">Bhejein</button><div id="pmsg"></div></div><div class="card" id="pl">Loading...</div>';
+}
+function loadPay(){fetch(URL_+"/rest/v1/payments?select=*&order=submitted_at.desc&limit=100",{headers:H()}).then(J).then(function(d){if(V!="sub")return;$("pl").innerHTML='<b>Aap ki payments</b>'+(d.map(function(x){return '<div class="fi"><b>'+money(x.amount)+'</b> <span class="tag '+(x.status=="verified"?"tg-ok":x.status=="rejected"?"tg-bad":"tg-n")+'">'+esc(x.status)+'</span><div class="mut">'+esc(x.method)+' · '+esc(x.reference||"")+' · '+new Date(x.submitted_at).toLocaleString()+'</div></div>'}).join("")||'<div class="mut">Abhi koi payment nahi.</div>')}).catch(function(){})}
+function vRacc(){
+ return '<div class="card"><b>Mera account</b><div class="mut">'+esc($("who").textContent)+' · '+esc(ROLE=="owner"?"Owner":"Branch Manager")+'</div><input id="np" type="password" placeholder="Naya password (8 ya zyada huroof)" autocomplete="new-password"><button class="btn" data-a="pw">Password badlein</button><div id="amsg"></div></div>'+
+ (ROLE=="owner"?'<div class="card"><b>Users ('+CTX.usage.users+' / '+((CTX.sub||{}).max_users||"-")+')</b>'+CTX.users.map(function(u){return '<div class="mut" style="margin-top:6px">'+esc(u.email)+' · '+esc(u.role)+(u.branch?" · "+esc(u.branch):"")+'</div>'}).join("")+'<div class="mut" style="margin-top:10px">Naya user jorne ke liye <a href="https://innoxol.com" target="_blank" rel="noopener">Sunno se rabta karein</a>.</div></div>':"");
+}
+function showR(v){
+ V=v;document.querySelectorAll("#sb a[data-v]").forEach(function(a){a.classList.toggle("on",a.getAttribute("data-v")==v)});
+ var it=RN.filter(function(x){return x[0]==v})[0];$("pt").textContent=it?it[1]:"";
+ if(CTX&&CTX.restaurant.active===false)return;
+ $("main").innerHTML=({dash:vRdash,qr:vRqr,br:vRbr,feed:vRfeed,comp:vRcomp,rep:vRrep,sub:vRsub,acc:vRacc})[v]();
+ if(v=="sub")loadPay();
+ if(v=="qr")drawQR();
+}
+$("main").onchange=function(e){if(ROLE=="admin"){if(e.target.id=="afr"){AF.r=e.target.value;$("main").innerHTML=vAfb()}else if(e.target.id=="afp"){AF.pd=parseInt(e.target.value,10);$("main").innerHTML=vAfb()}else if(e.target.id=="aqr"){AQ=e.target.value;$("main").innerHTML=vAqr();drawQR()}return}if(e.target.id=="rpd")PD=parseInt(e.target.value,10);else if(e.target.id=="rbf")BFLT=e.target.value;else return;showR(V)};
+function roleClick(t){
+ var a=t.getAttribute("data-a");
+ if(a=="rv"){var id=t.getAttribute("data-id");t.disabled=true;rest("PATCH","feedback?id=eq."+encodeURIComponent(id),{resolved:true}).then(function(){FB.forEach(function(e){if(String(e.id)==id)e.resolved=true});showR(V)}).catch(function(){t.disabled=false})}
+ else if(a=="pw"){var p=$("np").value;if(p.length<8)return msg("amsg","Password kam az kam 8 huroof ka rakhein.");fetch(URL_+"/auth/v1/user",{method:"PUT",headers:H(),body:JSON.stringify({password:p})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.msg||j.message||"Password nahi badla");$("np").value="";msg("amsg","Password badal gaya. Notes mein save kar lein.",true)})}).catch(function(e){msg("amsg",e.message)})}
+ else if(a=="sp2"){var am=parseInt($("pa").value,10);if(isNaN(am)||am<0)return msg("pmsg","Sahi rakam likhein.");t.disabled=true;rest("POST","payments",{restaurant_id:CTX.restaurant.id,amount:am,method:$("pm").value,reference:$("pr").value.trim()||null,note:$("pn").value.trim()||null}).then(function(){msg("pmsg","Saboot mil gaya. Sunno team verify karegi.",true);loadPay();t.disabled=false}).catch(function(e){msg("pmsg",e.message);t.disabled=false})}
+}
+var AF={r:"",pd:30};
+function toast(t){var d=document.createElement("div");d.textContent=t;d.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1b1a3a;color:#fff;padding:10px 16px;border-radius:10px;z-index:9";document.body.appendChild(d);setTimeout(function(){d.remove()},2600)}
+function rmBg(c){
+ var x=c.getContext("2d"),w=c.width,h=c.height,im=x.getImageData(0,0,w,h),d=im.data;
+ if(d[3]<10)return;
+ var r0=d[0],g0=d[1],b0=d[2],seen=new Uint8Array(w*h),st=[];
+ function push(px,py){if(px<0||py<0||px>=w||py>=h)return;var k=py*w+px;if(seen[k])return;seen[k]=1;var i=k*4;if(Math.abs(d[i]-r0)+Math.abs(d[i+1]-g0)+Math.abs(d[i+2]-b0)<60)st.push(k)}
+ for(var i=0;i<w;i++){push(i,0);push(i,h-1)}
+ for(var j=0;j<h;j++){push(0,j);push(w-1,j)}
+ while(st.length){var k=st.pop(),px=k%w,py=(k-px)/w;d[k*4+3]=0;push(px+1,py);push(px-1,py);push(px,py+1);push(px,py-1)}
+ x.putImageData(im,0,0);
+}
+function readLogo(file,cb,rm){
+ var fr=new FileReader();
+ fr.onload=function(){var im=new Image();im.onload=function(){
+  var s=512;
+  for(var k=0;k<3;k++){
+   var sc=Math.min(1,s/Math.max(im.width,im.height)),c=document.createElement("canvas");
+   c.width=Math.max(1,Math.round(im.width*sc));c.height=Math.max(1,Math.round(im.height*sc));
+   c.getContext("2d").drawImage(im,0,0,c.width,c.height);if(rm)rmBg(c);
+   var d=c.toDataURL("image/png");
+   if(d.length<250000||k==2){cb(d.length<450000?d:null);return}
+   s=Math.round(s*0.6);
+  }
+ };im.onerror=function(){cb(null)};im.src=fr.result};
+ fr.onerror=function(){cb(null)};fr.readAsDataURL(file);
+}
+function brandSave(t,card,s,mm,err){
+ var q=function(i){return card.querySelector('[data-i="'+i+'"]')},gl=val(card,"gl");
+ if(gl&&!/^https:\/\//.test(gl))return err(new Error("Google link https:// se shuru hona chahiye"));
+ var body={brand_color:val(card,"bc"),brand_font:val(card,"bf")||null,brand_style:val(card,"bs"),holo:q("bh").checked,hide_name:q("bn2").checked,google_link:gl||null};
+ var f=q("bl2").files[0],rm=q("bg").checked,ae=val(card,"ae");
+ function send(){rest("PATCH","restaurants?slug=eq."+encodeURIComponent(s),body).then(function(){return rpc("admin_set_alert_email",{p_slug:s,p_email:ae})}).then(reload).then(function(){toast("Branding save ho gayi")}).catch(function(e){err(e);t.disabled=false})}
+ t.disabled=true;
+ if(f)readLogo(f,function(d){if(!d){err(new Error("Logo nahi parha ja saka ya bohat bara hai. Chhota PNG ya JPG chunein."));t.disabled=false;return}body.logo_data=d;send()},rm);else send();
+}
+function itemA(e){return item(e).replace(/<button class="sbtn" data-a="rv"[^>]*>[^<]*<\/button>/,"")}
+function loadAdminFB(){
+ $("main").innerHTML='<div class="card">Loading...</div>';
+ loadFB().then(function(){if(V=="fb")$("main").innerHTML=vAfb()}).catch(function(e){$("main").innerHTML='<div class="card"><div class="msg er">Feedback load nahi hui</div></div>'});
+}
+function vAfb(){
+ var from=AF.pd>0?Date.now()-AF.pd*864e5:0,nm={};DATA.forEach(function(c){nm[c.id]=c.name});
+ var c=FB.filter(function(e){return new Date(e.created_at).getTime()>=from&&(!AF.r||e.restaurant_id==AF.r)}),open=c.filter(function(e){return e.rating<=3&&!e.resolved}).length,g={};
+ c.forEach(function(e){var x=g[e.restaurant_id]||(g[e.restaurant_id]={n:0,s:0,o:0});x.n++;x.s+=e.rating;if(e.rating<=3&&!e.resolved)x.o++});
+ var h='<div class="card row" style="margin-top:0"><select id="afp">'+PDO.map(function(o){return '<option value="'+o[0]+'"'+(o[0]==AF.pd?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select><select id="afr"><option value="">Sab restaurants</option>'+DATA.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id==AF.r?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
+ h+='<div class="grid">'+kp(c.length,"Total feedback")+kp(avg(c).toFixed(1)+" ★","Average rating")+kp(open,"Open complaints",open?"var(--bad)":"")+'</div>';
+ h+='<div class="card"><b>Restaurant-wise</b><table style="width:100%;margin-top:8px;font-size:14px;border-collapse:collapse"><tr style="text-align:left;color:#6b6c80"><th>Restaurant</th><th>Feedback</th><th>Avg</th><th>Open</th></tr>'+Object.keys(g).sort(function(a,b){return g[b].n-g[a].n}).map(function(k){return '<tr style="border-top:1px solid #e6e7f0"><td>'+esc(nm[k]||"-")+'</td><td>'+g[k].n+'</td><td>'+(g[k].s/g[k].n).toFixed(1)+'</td><td>'+g[k].o+'</td></tr>'}).join("")+'</table></div>';
+ return h+'<div class="card"><b>Recent feedback</b>'+(c.slice(0,50).map(function(e){return '<div class="mut" style="margin-top:8px"><b>'+esc(nm[e.restaurant_id]||"-")+'</b></div>'+itemA(e)}).join("")||'<div class="mut">Koi feedback nahi.</div>')+'</div>';
+}
+var AQ="";
+function fbBase(){return location.href.split("?")[0].split("#")[0].replace(/app\.html$/,"f.html").replace(/\/$/,"/f.html")}
+function drawQR(){document.querySelectorAll(".qrbox").forEach(function(b){if(b.firstChild)return;try{new QRCode(b,{text:b.getAttribute("data-link"),width:200,height:200,correctLevel:QRCode.CorrectLevel.M})}catch(e){b.textContent="QR nahi ban saka"}})}
+function qrHtml(slug,name,br){var base=fbBase();return br.map(function(n){var link=base+"?r="+encodeURIComponent(slug)+"&branch="+encodeURIComponent(n);return '<div class="card" style="text-align:center"><b>'+esc(name)+' – '+esc(n)+'</b><div class="qrbox" data-link="'+esc(link)+'" style="display:block;width:max-content;margin:10px auto;background:#fff;padding:12px;border-radius:10px"></div><button class="sbtn" data-qs="'+esc(slug+"-"+n)+'">QR save karein</button><div class="mut" style="word-break:break-all;margin-top:6px">'+esc(link)+'</div></div>'}).join("")||'<div class="card">Koi branch nahi.</div>'}
+function saveQR(b){var box=b.parentNode.querySelector(".qrbox"),c=box.querySelector("canvas"),im=box.querySelector("img"),u=c?c.toDataURL("image/png"):(im?im.src:"");if(!u)return;var l=document.createElement("a");l.href=u;l.download=b.getAttribute("data-qs").replace(/\s+/g,"-")+".png";document.body.appendChild(l);l.click();l.remove()}
+function vAqr(){var c=DATA.filter(function(x){return x.slug==AQ})[0]||DATA[0];if(!c)return '<div class="card">Koi restaurant nahi.</div>';AQ=c.slug;return '<div class="card" style="margin-top:0"><select id="aqr">'+DATA.map(function(x){return '<option value="'+esc(x.slug)+'"'+(x.slug==AQ?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>'+qrHtml(c.slug,c.name,c.branches.map(function(b){return b.name}))}
+function vRqr(){return qrHtml(CTX.restaurant.slug,CTX.restaurant.name,CTX.branches.map(function(b){return b.name}))}
+function createClient(b){
+ var name=$("cn").value.trim(),slug=$("cs").value.trim(),em=$("ce").value.trim(),pw=$("cp").value,pkn=$("cg").value,bl=$("cl").value;
+ var br=$("cb").value.split(",").map(function(x){return x.trim()}).filter(Boolean),p=PK.filter(function(x){return x.name==pkn})[0];
+ if(!name||!slug||!em||!br.length)return msg("cm","Naam, link, email aur kam az kam ek branch zaroori hai.");
+ if(pw.length<8)return msg("cm","Password kam az kam 8 huroof ka rakhein.");
+ if(p&&br.length>p.max_branches)return msg("cm",pkn+" package mein sirf "+p.max_branches+" branch allowed hai.");
+ b.disabled=true;$("cm").innerHTML="";
+ fn("super-service",{name:name,slug:slug,email:em,password:pw,branches:br,alert_email:"",google_link:""})
+ .then(function(){return rpc("admin_set_package",{p_slug:slug,p_package:pkn,p_billing:bl,p_days:bl=="annual"?365:30})})
+ .then(reload).then(function(){msg("cm","Client ban gaya: ?r="+slug,true)}).catch(function(x){msg("cm",x.message);b.disabled=false});
+}
+</script>
+</body>
+</html>
