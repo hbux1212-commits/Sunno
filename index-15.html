@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feedback</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1d1d1b;--mu:#6b6a65;--ac:#0f766e;--on:#fff;--bad:#b42318;--ok:#067647;--bd:#e3e1da}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--card:#212120;--tx:#f1f0ea;--mu:#a09f98;--ac:#2dd4bf;--on:#111;--bad:#f97066;--ok:#47cd89;--bd:#34332f}}
+*{box-sizing:border-box}
+body{margin:0;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.w{max-width:520px;margin:0 auto;padding:16px}
+.hd{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;margin-bottom:12px;background:var(--card);border:1px solid var(--bd)}
+.hd h1{margin:0;font-size:22px}.hd p{margin:0;color:var(--mu);font-size:14px}
+body.bold .hd{background:var(--ac);border-color:var(--ac);color:var(--on)}body.bold .hd p{color:inherit;opacity:.85}
+.lp{background:#fff;border-radius:12px;padding:6px;display:flex}.lp img{max-height:56px;max-width:140px;display:block}
+@keyframes hl{0%,100%{filter:drop-shadow(0 0 5px #ff3df0)}33%{filter:drop-shadow(0 0 5px #3dd9ff)}66%{filter:drop-shadow(0 0 5px #ffe53d)}}img.holo{animation:hl 3s linear infinite}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.stars{display:flex;gap:6px;font-size:40px;margin:8px 0}.stars span{cursor:pointer;color:var(--bd)}.stars span.on{color:#f5a623}
+textarea,select{width:100%;padding:10px;margin-top:8px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.b{display:block;text-align:center;text-decoration:none;width:100%;margin-top:10px;padding:13px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font:inherit;font-weight:700}
+.b:disabled{opacity:.6}
+.msg{padding:12px;border-radius:10px;margin-top:10px;font-size:15px}.good{background:rgba(6,118,71,.12);color:var(--ok)}.badm{background:rgba(180,35,24,.12);color:var(--bad)}
+.hide{display:none}.ft{text-align:center;font-size:12px;color:var(--mu);margin-top:18px}.ft a{color:inherit}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="hd hide" id="hd"><div id="logo" class="lp hide"><img id="logoi" alt=""></div><div><h1 id="brand"></h1><p>Aap ki raye hamare liye ahem hai</p></div></div>
+<div class="c" id="box"><div id="q" style="color:var(--mu)">Loading...</div>
+<div id="fm" class="hide"><b id="qt"></b><select id="br"></select><div class="stars" id="st"></div><textarea id="cm" rows="3" placeholder="Apna comment likhein (optional)"></textarea><button class="b" id="go">Submit</button></div>
+<div id="res"></div></div>
+<div class="ft" style="margin-bottom:6px">Aap ki feedback sirf is restaurant ko bheji jati hai. Aap ki zaati maloomat nahi mangi jati.</div>
+<div class="ft">Powered by <a href="https://innoxol.com" target="_blank" rel="noopener">Sunno</a></div>
+</div>
+<script>
+var URL_="https://janatzwnpkkktdjtijvg.supabase.co",KEY="sb_publishable_c0zs6fe0koMK3koP5lsvhw_et_UnE2a";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var P=new URLSearchParams(location.search),SLUG=P.get("r"),QB=P.get("branch"),REST=null,rate=0;
+var FONTS=["Poppins","Montserrat","Playfair Display","Pacifico","Lobster","Bebas Neue","Oswald","Raleway","Dancing Script","Cinzel"];
+function $(i){return document.getElementById(i)}
+function J(x){if(!x.ok)throw new Error(x.status);return x.json()}
+function say(t,k){$("res").innerHTML='<div class="msg '+k+'">'+t+'</div>'}
+function brand(r){
+ var c=/^#[0-9a-fA-F]{6}$/.test(r.brand_color||"")?r.brand_color:null,R=document.documentElement.style;
+ if(c){R.setProperty("--ac",c);var n=parseInt(c.slice(1),16),l=.299*(n>>16)+.587*(n>>8&255)+.114*(n&255);R.setProperty("--on",l>170?"#111":"#fff");
+  if(r.brand_style=="soft")R.setProperty("--bg","color-mix(in srgb, "+c+" 9%, #fff)")}
+ if(r.brand_style=="bold")document.body.className="bold";
+ if(r.logo_data&&/^data:image\/(png|jpeg|webp|svg\+xml);base64,/.test(r.logo_data)){$("logoi").src=r.logo_data;$("logo").className="lp";if(r.holo)$("logoi").className="holo"}
+ $("brand").textContent=r.name;document.title=r.name+" – Feedback";
+ if(r.brand_font&&FONTS.indexOf(r.brand_font)>=0){var l2=document.createElement("link");l2.rel="stylesheet";l2.href="https://fonts.googleapis.com/css2?family="+encodeURIComponent(r.brand_font).replace(/%20/g,"+")+"&display=swap";document.head.appendChild(l2);$("brand").style.fontFamily="'"+r.brand_font+"',system-ui,sans-serif"}
+ if(r.hide_name&&r.logo_data)$("brand").className="hide";
+ $("hd").className="hd";
+}
+for(var i=1;i<=5;i++){(function(n){var s=document.createElement("span");s.textContent="★";s.onclick=function(){rate=n;[].forEach.call($("st").children,function(x,k){x.className=k<n?"on":""})};$("st").appendChild(s)})(i)}
+function init(){
+ if(!SLUG){$("q").textContent="Ye link adhoora hai. QR dobara scan karein.";return}
+ fetch(URL_+"/rest/v1/restaurants?slug=eq."+encodeURIComponent(SLUG)+"&select=id,slug,name,google_link,foodpanda_link,logo_data,brand_color,brand_font,hide_name,brand_style,holo,active",{headers:H}).then(J).then(function(a){
+  if(!a.length)throw new Error("none");REST=a[0];brand(REST);
+  if(REST.active===false)throw new Error("off");
+  $("qt").textContent=REST.name+" mein aap ka experience kaisa raha?";
+  return fetch(URL_+"/rest/v1/branches?restaurant_id=eq."+REST.id+"&select=name&order=name",{headers:H}).then(J);
+ }).then(function(b){
+  b.forEach(function(x){var o=document.createElement("option");o.textContent=x.name;$("br").appendChild(o)});
+  if(QB)$("br").value=QB;$("q").className="hide";$("fm").className="";
+ }).catch(function(e){$("q").textContent=(e&&e.message=="off")?"Ye service filhal band hai.":"Ye restaurant nahi mila. Link dobara check karein."});
+}
+$("go").onclick=function(){
+ var b=$("go"),br=$("br").value,rt=rate;
+ if(!rt)return say("Pehle star rating select karein.","badm");
+ b.disabled=true;$("res").innerHTML="";
+ fetch(URL_+"/rest/v1/feedback",{method:"POST",headers:Object.assign({"Prefer":"return=minimal"},H),body:JSON.stringify({restaurant_id:REST.id,branch:br,rating:rt,comment:$("cm").value.trim()||null})})
+ .then(function(x){
+  if(!x.ok)throw new Error(x.status);
+  if(rt<=3){say("Shukriya. Hume afsos hai, manager aap se rabta karenge.","badm")}
+  else{var ok=function(x){return /^https:\/\//.test(x||"")?x.replace(/"/g,"%22"):""},u=ok(REST.google_link),f=ok(REST.foodpanda_link);$("res").innerHTML='<div class="msg good">Shukriya! Aap ki feedback save ho gayi.'+((u||f)?" Agar aap ko pasand aaya, to review bhi dein:":"")+'</div>'+(u?'<a class="b" target="_blank" rel="noopener" href="'+u+'">Google par review dein</a>':"")+(f?'<a class="b" target="_blank" rel="noopener" href="'+f+'">Foodpanda par review dein</a>':"")}
+  $("fm").className="hide";
+ }).catch(function(){say("Save nahi ho saki. Internet check karke dobara koshish karein.","badm");b.disabled=false});
+};
+init();
+</script>
+</body>
+</html>
